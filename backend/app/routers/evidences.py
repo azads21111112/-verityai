@@ -4,7 +4,11 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Claim, Evidence
 from app.schemas.evidence import EvidenceCreate, EvidenceResponse
-
+from app.schemas.evidence import (
+    EvidenceCreate,
+    EvidenceResponse,
+    EvidenceUpdate,
+)
 
 router = APIRouter(
     prefix="/api/claims/{claim_id}/evidences",
@@ -75,3 +79,71 @@ def get_claim_evidences(
         .order_by(Evidence.created_at.desc())
         .all()
     )
+@router.patch(
+    "/{evidence_id}",
+    response_model=EvidenceResponse
+)
+def update_evidence(
+    claim_id: int,
+    evidence_id: int,
+    evidence_data: EvidenceUpdate,
+    db: Session = Depends(get_db)
+):
+    claim = db.query(Claim).filter(
+        Claim.id == claim_id
+    ).first()
+
+    if not claim:
+        raise HTTPException(
+            status_code=404,
+            detail="Claim not found"
+        )
+
+    evidence = db.query(Evidence).filter(
+        Evidence.id == evidence_id,
+        Evidence.claim_id == claim_id
+    ).first()
+
+    if not evidence:
+        raise HTTPException(
+            status_code=404,
+            detail="Evidence not found for this claim"
+        )
+
+    update_data = evidence_data.model_dump(
+        exclude_unset=True
+    )
+
+    for field, value in update_data.items():
+        setattr(evidence, field, value)
+
+    db.commit()
+    db.refresh(evidence)
+
+    return evidence
+
+
+@router.delete(
+    "/{evidence_id}",
+    status_code=204
+)
+def delete_evidence(
+    claim_id: int,
+    evidence_id: int,
+    db: Session = Depends(get_db)
+):
+    evidence = db.query(Evidence).filter(
+        Evidence.id == evidence_id,
+        Evidence.claim_id == claim_id
+    ).first()
+
+    if not evidence:
+        raise HTTPException(
+            status_code=404,
+            detail="Evidence not found for this claim"
+        )
+
+    db.delete(evidence)
+    db.commit()
+
+    return None

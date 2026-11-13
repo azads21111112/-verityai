@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">VerityAI</string>
+    <string name="title_activity_main">VerityAI</string>
+    <string name="package_name">com.verityai.app</string>
+    <string name="custom_url_scheme">com.verityai.app</string>
+</resources>

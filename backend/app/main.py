@@ -9,7 +9,26 @@ from app.models import Claim, Evidence, Source
 
 from app.routers.claims import router as claims_router
 from app.routers.evidences import router as evidences_router
+
+
+from app.routers.evidence_repository import router as evidence_repository_router
+
 from app.routers.sources import router as sources_router
+from app.models import Claim, Evidence, Source, Article, AIAnalysis
+from app.routers import claim_analysis_links
+from app.routers import comparison
+
+from app.models import (
+    Claim,
+    Evidence,
+    Source,
+    Article,
+    AIAnalysis,
+    ClaimAnalysisLink,
+)
+
+from app.routers.articles import router as articles_router
+from app.routers.ai_analyses import router as ai_analyses_router
 
 
 app = FastAPI(
@@ -50,8 +69,13 @@ Base.metadata.create_all(bind=engine)
 # Register API routers
 app.include_router(claims_router)
 app.include_router(evidences_router)
-app.include_router(sources_router)
 
+app.include_router(evidence_repository_router)
+app.include_router(sources_router)
+app.include_router(articles_router)
+app.include_router(ai_analyses_router)
+app.include_router(claim_analysis_links.router)
+app.include_router(comparison.router)
 
 @app.get("/")
 def root():

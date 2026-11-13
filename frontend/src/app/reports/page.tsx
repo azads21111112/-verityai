@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://verityai-backend-7m7y.onrender.com";
 
 type Claim = {
   id: number;

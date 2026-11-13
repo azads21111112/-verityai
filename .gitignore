@@ -25,3 +25,13 @@ build/
 
 # Logs
 *.log
+# Android local/build files
+frontend/android/local.properties
+frontend/android/.gradle/
+frontend/android/**/build/
+*.iml
+
+# Temporary files
+frontend/src/app/page.tsx.backup
+project_structure.txt
+frontend/android/.idea/

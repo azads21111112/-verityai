@@ -30,10 +30,20 @@ class Evidence(Base):
 
     source_url = Column(Text, nullable=False)
 
+    # Source classification
+    source_type = Column(
+        String(50),
+        nullable=True
+    )
+
+    # Supporting / Contradicting / Neutral
     evidence_type = Column(
         String(30),
         nullable=False
     )
+
+    # Relevant text from the original source
+    excerpt = Column(Text, nullable=True)
 
     description = Column(Text, nullable=True)
 
@@ -41,11 +51,9 @@ class Evidence(Base):
 
     published_at = Column(DateTime(timezone=True), nullable=True)
 
+    accessed_at = Column(DateTime(timezone=True), nullable=True)
+
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now()
     )
-
-
-
-    

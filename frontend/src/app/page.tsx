@@ -12,82 +12,66 @@ type Claim = {
   created_at: string | null;
 };
 
+const API = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
 export default function Home() {
   const [claims, setClaims] = useState<Claim[]>([]);
   const [sourceCount, setSourceCount] = useState(0);
+  const [articleCount, setArticleCount] = useState(0);
+  const [humanReviewed, setHumanReviewed] = useState(0);
+  const [agreementRate, setAgreementRate] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
- useEffect(() => {
-  async function fetchDashboardData() {
-    try {
-      const [claimsResponse, sourcesResponse] = await Promise.all([
-        fetch("http://127.0.0.1:8000/api/claims/"),
-        fetch("http://127.0.0.1:8000/api/sources/"),
-      ]);
+  useEffect(() => {
+    async function fetchDashboardData() {
+      try {
+        const endpoints = ["claims", "sources", "articles", "comparison"];
 
-      if (!claimsResponse.ok || !sourcesResponse.ok) {
-        throw new Error("Unable to fetch dashboard data");
+        const responses = await Promise.all(
+          endpoints.map((endpoint) => fetch(`${API}/api/${endpoint}/`))
+        );
+
+        if (responses.some((response) => !response.ok)) {
+          throw new Error("Unable to fetch dashboard data");
+        }
+
+        const [claimsData, sourcesData, articlesData, comparisonData] =
+          await Promise.all(responses.map((response) => response.json()));
+
+        setClaims(claimsData);
+        setSourceCount(sourcesData.length);
+        setArticleCount(articlesData.length);
+        setHumanReviewed(comparisonData.summary.human_reviewed);
+        setAgreementRate(comparisonData.summary.agreement_rate);
+      } catch {
+        setError("Backend connection failed. Please check the API server.");
+      } finally {
+        setLoading(false);
       }
-
-      const claimsData = await claimsResponse.json();
-      const sourcesData = await sourcesResponse.json();
-
-      setClaims(claimsData);
-      setSourceCount(sourcesData.length);
-
-    } catch {
-      setError("Backend connection failed. Please check the API server.");
-    } finally {
-      setLoading(false);
     }
-  }
 
-  fetchDashboardData();
-}, []);
+    fetchDashboardData();
+  }, []);
 
-  const totalClaims = claims.length;
-  const verifiedClaims = claims.filter(
-    (claim) => claim.verdict === "Verified"
-  ).length;
-  const falseClaims = claims.filter(
-    (claim) => claim.verdict === "False"
-  ).length;
-  const pendingClaims = claims.filter(
-    (claim) => !claim.verdict
-  ).length;
+  const countVerdict = (verdict: string) =>
+    claims.filter(
+      (claim) => claim.verdict?.toLowerCase() === verdict.toLowerCase()
+    ).length;
+
+  const disagreementRate =
+    agreementRate === null ? "N/A" : `${(100 - agreementRate * 100).toFixed(1)}%`;
 
   const stats = [
-    {
-      label: "Total Claims",
-      value: totalClaims,
-      icon: "◈",
-      color: "blue",
-    },
-    {
-      label: "Verified Claims",
-      value: verifiedClaims,
-      icon: "✓",
-      color: "green",
-    },
-    {
-      label: "False Claims",
-      value: falseClaims,
-      icon: "✕",
-      color: "red",
-    },
-    {
-      label: "Pending Review",
-      value: pendingClaims,
-      icon: "◷",
-      color: "orange",
-    },
-    {
-  label: "Registered Sources",
-  value: sourceCount,
-  icon: "◎",
-  color: "blue",
-},
+    { label: "News Articles Investigated", value: articleCount, icon: "▤", color: "blue" },
+    { label: "Factual Claims Extracted", value: claims.length, icon: "◈", color: "blue" },
+    { label: "Human-Reviewed Claims", value: humanReviewed, icon: "✓", color: "green" },
+    { label: "False Claims", value: countVerdict("False"), icon: "✕", color: "red" },
+    { label: "Misleading Claims", value: countVerdict("Misleading"), icon: "⚠", color: "orange" },
+    { label: "Partially True Claims", value: countVerdict("Partially True"), icon: "◐", color: "orange" },
+    { label: "Unverifiable Claims", value: countVerdict("Unverifiable"), icon: "?", color: "blue" },
+    { label: "AI-Human Disagreement", value: disagreementRate, icon: "⇄", color: "red" },
+    { label: "Registered Sources", value: sourceCount, icon: "◎", color: "blue" },
   ];
 
   return (

@@ -10,6 +10,10 @@ const pages = [
   { name: "Evidence", path: "/evidence", icon: "◈" },
   { name: "Reports", path: "/reports", icon: "▥" },
   { name: "Sources", path: "/sources", icon: "◎" },
+  { name: "Articles", path: "/articles", icon: "▧" },
+  { name: "AI Analysis", path: "/ai-analysis", icon: "✧" },
+  { name: "Human Verification", path: "/human-review", icon: "✓" },
+  { name: "AI vs Human Comparison", path: "/comparison", icon: "⇄" },
 ];
 
 export default function Navigation() {
@@ -27,6 +31,7 @@ export default function Navigation() {
           >
             ☰
           </button>
+
           <Link href="/" className="text-xl font-bold text-blue-700">
             VerityAI
           </Link>
@@ -43,11 +48,14 @@ export default function Navigation() {
           onClick={() => setOpen(false)}
         >
           <nav
-            className="h-full w-72 max-w-[85%] bg-white p-5 shadow-xl"
+            className="h-full w-72 max-w-[85%] overflow-y-auto bg-white p-5 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-8 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-blue-700">VerityAI</h2>
+              <h2 className="text-xl font-bold text-blue-700">
+                VerityAI
+              </h2>
+
               <button
                 onClick={() => setOpen(false)}
                 aria-label="Close menu"

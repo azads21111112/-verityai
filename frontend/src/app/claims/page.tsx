@@ -12,7 +12,7 @@ type Claim = {
   verdict: string | null;
 };
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://verityai-backend-7m7y.onrender.com";
 
 export default function ClaimsPage() {
   const [claims, setClaims] = useState<Claim[]>([]);
